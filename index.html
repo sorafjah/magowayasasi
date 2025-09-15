@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>magowahasasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            -webkit-tap-highlight-color: transparent; /* スマホでのタップ時のハイライトを無効化 */
+        }
+        .check-box {
+            transition: all 0.2s ease-in-out;
+        }
+        .check-box.checked {
+            background-color: #6ee7b7; /* bg-green-300 */
+            border-color: #34d399; /* border-green-400 */
+            color: #065f46; /* text-green-800 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-8">
+    <div class="w-full max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8">
+        
+        <!-- 週のナビゲーション -->
+        <div class="flex items-center justify-between mb-6">
+            <button id="prev-week" class="transition-colors p-2">
+                <i class="fas fa-chevron-left fa-fw text-2xl text-gray-500 hover:text-gray-800"></i>
+            </button>
+            <h2 id="week-display" class="text-xl font-semibold text-gray-700 tracking-wider"></h2>
+            <button id="next-week" class="transition-colors p-2">
+                <i class="fas fa-chevron-right fa-fw text-2xl text-gray-500 hover:text-gray-800"></i>
+            </button>
+        </div>
+
+        <!-- チェックリスト -->
+        <div id="checklist" class="space-y-3">
+            <!-- JavaScriptで項目がここに追加されます -->
+        </div>
+        
+        <!-- 摂取目安量 -->
+        <div class="mt-8 border-t pt-6">
+            <h3 class="text-lg font-bold text-center text-green-800 mb-4">1週間あたりのめやす量（成人）</h3>
+            <div class="space-y-4 text-sm text-green-700">
+                <div>
+                    <h4 class="font-semibold text-green-800">① 豆類（大豆製品・豆）</h4>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">例：豆腐1/3丁、納豆1パック、煮豆小鉢など</p>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">1日50〜100g（ゆで大豆換算で約1/2カップ）、週に 350〜700g 程度</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-green-800">② ごま（種実類：ごま・ナッツ）</h4>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">例：ごま大さじ1〜2、アーモンド5〜10粒</p>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">1日10〜20g、週に 70〜140g 程度</p>
+                </div>
+                 <div>
+                    <h4 class="font-semibold text-green-800">③ 海藻</h4>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">例：わかめの味噌汁、ひじき煮、小鉢1品程度</p>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">1日5〜10g（乾物換算）、週に 35〜70g（乾物）（水で戻すと約5〜10倍になる）</p>
+                </div>
+                 <div>
+                    <h4 class="font-semibold text-green-800">④ 野菜</h4>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">例：生野菜サラダ1皿＋煮物やお浸し2皿くらい</p>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">1日350g以上（うち緑黄色野菜120g以上）、週に 2,450g（2.5kg程度）</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-green-800">⑤ 魚類</h4>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">例：切り身1切れ（80g）、刺身小鉢</p>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">1日60〜100g程度（肉と交互でOK）、週に 420〜700g 程度（厚労省は「魚を週2回以上」と推奨）</p>
+                </div>
+                 <div>
+                    <h4 class="font-semibold text-green-800">⑥ きのこ類</h4>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">例：しいたけ2枚、しめじ1/2パック</p>
+                    <p class="ml-4 pl-2 border-l-2 border-green-200">1日50〜70g、週に 350〜500g 程度</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const weekDisplay = document.getElementById('week-display');
+            const checklistContainer = document.getElementById('checklist');
+            const prevWeekBtn = document.getElementById('prev-week');
+            const nextWeekBtn = document.getElementById('next-week');
+
+            let currentDate = new Date();
+            let appData = {};
+
+            const foodCategories = [
+                { id: 'mame', name: 'まめ', emoji: '🫘' },
+                { id: 'goma', name: 'ごま・ナッツ', emoji: '🥜' },
+                { id: 'kaiso', name: 'かいそう', emoji: '🌿' },
+                { id: 'yasai', name: 'やさい', emoji: '🥬' },
+                { id: 'sakana', name: 'さかな', emoji: '🐟' },
+                { id: 'kinoko', name: 'きのこ', emoji: '🍄' },
+            ];
+
+            // データの読み込み
+            function loadData() {
+                const savedData = localStorage.getItem('mealCheckDataV3');
+                appData = savedData ? JSON.parse(savedData) : {};
+            }
+
+            // データの保存
+            function saveData() {
+                localStorage.setItem('mealCheckDataV3', JSON.stringify(appData));
+            }
+
+            // 週のキーを取得 (例: "2023-37")
+            function getWeekKey(date) {
+                const d = new Date(date);
+                d.setHours(0, 0, 0, 0);
+                d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+                const yearStart = new Date(d.getFullYear(), 0, 1);
+                const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+                return `${d.getFullYear()}-${weekNo}`;
+            }
+            
+            // 週の開始日と終了日を取得
+            function getWeekDateRange(date) {
+                const d = new Date(date);
+                const day = d.getDay();
+                const diffStart = d.getDate() - day + (day === 0 ? -6 : 1); // 月曜始まり
+                const startDate = new Date(d.setDate(diffStart));
+                const endDate = new Date(new Date(startDate).setDate(startDate.getDate() + 6));
+                return { startDate, endDate };
+            }
+
+            // UIの描画
+            function render() {
+                const { startDate, endDate } = getWeekDateRange(currentDate);
+                const format = (dt) => `${dt.getMonth() + 1}/${dt.getDate()}`;
+                weekDisplay.textContent = `${format(startDate)} ~ ${format(endDate)}`;
+
+                const weekKey = getWeekKey(currentDate);
+                if (!appData[weekKey]) {
+                    appData[weekKey] = {};
+                    foodCategories.forEach(cat => {
+                        appData[weekKey][cat.id] = [false, false];
+                    });
+                }
+                const weekData = appData[weekKey];
+
+                checklistContainer.innerHTML = '';
+                foodCategories.forEach(category => {
+                    const row = document.createElement('div');
+                    row.className = 'flex justify-between items-center gap-3';
+
+                    for (let i = 0; i < 2; i++) {
+                        const checkBox = document.createElement('div');
+                        checkBox.className = 'check-box relative w-full h-14 flex items-center justify-center text-center text-md font-semibold text-green-800 bg-green-100 rounded-lg border-2 border-green-200 cursor-pointer transform hover:scale-105';
+                        checkBox.dataset.category = category.id;
+                        checkBox.dataset.index = i;
+                        
+                        const isChecked = weekData[category.id] && weekData[category.id][i];
+                        
+                        if (isChecked) {
+                            checkBox.classList.add('checked');
+                            checkBox.innerHTML = `<span class="flex-grow text-center">${category.emoji} ${category.name}</span><span class="text-xl pr-3 text-white">●</span>`;
+                        } else {
+                            checkBox.innerHTML = `<span class="flex-grow text-center">${category.emoji} ${category.name}</span>`;
+                        }
+                        row.appendChild(checkBox);
+                    }
+                    checklistContainer.appendChild(row);
+                });
+            }
+
+            // イベントリスナー
+            prevWeekBtn.addEventListener('click', () => {
+                currentDate.setDate(currentDate.getDate() - 7);
+                render();
+            });
+
+            nextWeekBtn.addEventListener('click', () => {
+                currentDate.setDate(currentDate.getDate() + 7);
+                render();
+            });
+
+            checklistContainer.addEventListener('click', (e) => {
+                const checkBox = e.target.closest('.check-box');
+                if (checkBox) {
+                    const category = checkBox.dataset.category;
+                    const index = parseInt(checkBox.dataset.index, 10);
+                    const weekKey = getWeekKey(currentDate);
+                    const catInfo = foodCategories.find(c => c.id === category);
+
+                    // 状態をトグル
+                    appData[weekKey][category][index] = !appData[weekKey][category][index];
+                    const isChecked = appData[weekKey][category][index];
+
+                    // UIを更新
+                    checkBox.classList.toggle('checked', isChecked);
+                    if (isChecked) {
+                        checkBox.innerHTML = `<span class="flex-grow text-center">${catInfo.emoji} ${catInfo.name}</span><span class="text-xl pr-3 text-white">●</span>`;
+                    } else {
+                        checkBox.innerHTML = `<span class="flex-grow text-center">${catInfo.emoji} ${catInfo.name}</span>`;
+                    }
+                    
+                    saveData();
+                }
+            });
+
+            // 初期化
+            loadData();
+            render();
+        });
+    </script>
+</body>
+</html>
+
